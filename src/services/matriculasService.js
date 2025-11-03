@@ -1,26 +1,26 @@
 import { api } from "./api";
 
 export const getMatriculas = async () => {
-  // TODO: Implementar GET para listar matrículas
-  return await api.get("/matriculas");
+  const response = await api.get("/matriculas");
+  return response;
 };
 
 export const getMatricula = async (cod) => {
-  // TODO: Implementar GET para obtener una matrícula
-  return await api.get(`/matriculas/${cod}`);
+  const response = await api.get(`/matriculas/${cod}`);
+  return response;
 };
 
 export const createMatricula = async (data) => {
-  // TODO: Implementar POST para crear matrícula
-  return await api.post("/matriculas", data);
+  const response = await api.post("/matriculas", data);
+  return response;
 };
 
 export const updateMatricula = async (cod, data) => {
-  // TODO: Implementar PUT para actualizar matrícula
-  return await api.put(`/matriculas/${cod}`, data);
+  const response = await api.put(`/matriculas/${cod}`, data);
+  return response;
 };
 
 export const deleteMatricula = async (cod) => {
-  // TODO: Implementar DELETE para eliminar matrícula
-  return await api.delete(`/matriculas/${cod}`);
+  const response = await api.delete(`/matriculas/${cod}`);
+  return response;
 };
