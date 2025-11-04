@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
+import { Search } from "lucide-react";
 
 export default function FacturasPage() {
   const [facturas, setFacturas] = useState([]);
@@ -40,34 +41,26 @@ export default function FacturasPage() {
 
   const actualizarFacturasEnMora = async () => {
     try {
-      // Actualizar facturas vencidas a estado "en_mora" automáticamente
       const resultado = await api.post('/facturas/actualizar-mora');
-      console.log('✅ Facturas en mora actualizadas:', resultado);
+      console.log('Facturas en mora actualizadas:', resultado);
     } catch (err) {
-      // Silenciar el error si el endpoint no está disponible (404)
-      // Esto permite que la aplicación funcione mientras se hace el deploy
       if (err.message.includes('404') || err.message.includes('Failed to fetch')) {
-        console.warn('⚠️ Endpoint de mora no disponible. Usando actualización local temporal...');
-        // Actualización temporal en el cliente mientras se hace el deploy
+        console.warn('Endpoint de mora no disponible. Usando actualización local temporal...');
         actualizarMoraLocal();
       } else {
-        console.error('❌ Error al actualizar facturas en mora:', err.message);
+        console.error('Error al actualizar facturas en mora:', err.message);
       }
-      // No mostramos error al usuario, es un proceso en segundo plano
     }
   };
 
   const actualizarMoraLocal = () => {
-    // Función temporal que actualiza el estado en el cliente
-    // Se ejecuta solo si el endpoint del backend no está disponible
     const fechaActual = new Date().toISOString().split('T')[0];
     
     setFacturas(prevFacturas => 
       prevFacturas.map(factura => {
-        // Si la factura está vencida y no está pagada, cambiar a "en_mora"
         if ((factura.estado === 'Pendiente' || factura.estado === 'Vencida') && 
             factura.fecha_vencimiento < fechaActual) {
-          console.log(`📝 Actualizando factura ${factura.id} a estado "en_mora" (local)`);
+          console.log(`Actualizando factura ${factura.id} a estado "en_mora" (local)`);
           return { ...factura, estado: 'en_mora' };
         }
         return factura;
@@ -100,9 +93,9 @@ export default function FacturasPage() {
       const fechaB = new Date(b.fecha_creacion);
 
       if (ordenFecha === 'desc') {
-        return fechaB - fechaA; // Más reciente primero
+        return fechaB - fechaA; 
       } else {
-        return fechaA - fechaB; // Más antigua primero
+        return fechaA - fechaB; 
       }
     });
     setFacturas(facturasOrdenadas);
@@ -291,7 +284,18 @@ export default function FacturasPage() {
           Nueva Factura
         </button>
       </div>
-
+    <div>
+      
+       <div className="flex flex-row gap-2 w-full mb-4 ">
+          <input
+            type="text"
+            placeholder="Buscar por matricula"
+            
+            className="w-full h-12 px-4 text-sm text-gray-700 border border-blue-300 rounded-lg shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+          />
+          
+        </div>
+    </div>
       {/* Filtros */}
       <div className="mb-6 bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
         <div className="flex gap-4 items-center flex-wrap">
