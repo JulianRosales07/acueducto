@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
-import { Search } from "lucide-react";
+import { Search, 
+  RefreshCw, 
+  Eye, 
+  DollarSign, 
+  FileText, 
+  Download} from "lucide-react";
 
 export default function FacturasPage() {
   const [facturas, setFacturas] = useState([]);
@@ -14,6 +19,7 @@ export default function FacturasPage() {
   const [facturaSeleccionada, setFacturaSeleccionada] = useState(null);
   const [guardando, setGuardando] = useState(false);
   const [matriculas, setMatriculas] = useState([]);
+  const [busquedaMatricula, setBusquedaMatricula] = useState('');
 
   // Formulario de nueva factura individual
   const [formNueva, setFormNueva] = useState({
@@ -287,11 +293,12 @@ export default function FacturasPage() {
     <div>
       
        <div className="flex flex-row gap-2 w-full mb-4 ">
-          <input
+       <input
             type="text"
-            placeholder="Buscar por matricula"
-            
-            className="w-full h-12 px-4 text-sm text-gray-700 border border-blue-300 rounded-lg shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+            placeholder="Buscar por matrícula..."
+            value={busquedaMatricula}
+            onChange={(e) => setBusquedaMatricula(e.target.value)}
+            className="w-full h-12 pl-10 pr-4 text-sm text-gray-700 border border-gray-300 rounded-lg shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
           />
           
         </div>
@@ -314,20 +321,23 @@ export default function FacturasPage() {
             <option value="en_mora">En Mora</option>
           </select>
           <button
-            onClick={cargarFacturas}
-            className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded text-sm transition"
-          >
-            🔄 Actualizar
-          </button>
+              onClick={cargarFacturas}
+              className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-sm transition-all duration-200 flex items-center gap-2"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Actualizar
+            </button>
           <button
-            onClick={() => {
-              setFiltroEstado('');
-              cargarFacturas();
-            }}
-            className="ml-auto bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded text-sm transition"
-          >
-            Ver Todas las Facturas
-          </button>
+              onClick={() => {
+                setFiltroEstado('');
+                setBusquedaMatricula('');
+                cargarFacturas();
+              }}
+              className="ml-auto bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded-lg text-sm transition-all duration-200 flex items-center gap-2"
+            >
+              <Eye className="w-4 h-4" />
+              Ver Todas
+            </button>
         </div>
       </div>
 
@@ -396,39 +406,39 @@ export default function FacturasPage() {
                     </td>
                     <td className="px-4 py-3 text-sm">
                       <div className="flex gap-2">
-                        <button
+                      <button
                           onClick={() => verDetalleFactura(factura.id)}
-                          className="text-blue-600 hover:text-blue-800 font-medium"
+                          className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
                           title="Ver detalle"
                         >
-                          👁️
+                          <Eye className="w-4 h-4" />
                         </button>
                         {(factura.estado === 'Pendiente' || factura.estado === 'Vencida' || factura.estado === 'en_mora') && (
-                          <button
-                            onClick={() => abrirModalPago(factura)}
-                            className="text-green-600 hover:text-green-800 font-medium"
-                            title="Registrar pago"
-                          >
-                            💰
-                          </button>
+                           <button
+                           onClick={() => abrirModalPago(factura)}
+                           className="p-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200"
+                           title="Registrar pago"
+                         >
+                           <DollarSign className="w-4 h-4" />
+                         </button>
                         )}
                         <button
                           onClick={() => verFacturasPorMatricula(factura.cod_matricula)}
-                          className="text-purple-600 hover:text-purple-800 font-medium"
-                          title="Ver todas las facturas de esta matrícula"
+                          className="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-200"
+                          title="Ver facturas de esta matrícula"
                         >
-                          📋
+                          <FileText className="w-4 h-4" />
                         </button>
                         {factura.url && (
-                          <a
-                            href={factura.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-orange-600 hover:text-orange-800"
-                            title="Ver PDF"
-                          >
-                            📄
-                          </a>
+                           <a
+                           href={factura.url}
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           className="p-2 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-all duration-200"
+                           title="Descargar PDF"
+                         >
+                           <Download className="w-4 h-4" />
+                         </a>
                         )}
                       </div>
                     </td>
