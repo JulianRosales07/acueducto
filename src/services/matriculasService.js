@@ -13,6 +13,8 @@ export const getMatricula = async (cod) => {
 
 
 export const createMatricula = async (data) => {
+  // Nota: Removida la validación de duplicados porque un predio puede tener múltiples matrículas
+  // (por ejemplo, si se cancela una y se crea otra)
   const response = await api.post("/matriculas", data);
   return response;
 };

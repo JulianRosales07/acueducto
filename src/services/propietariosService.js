@@ -11,7 +11,12 @@ export const getPropietario = async (cc) => {
 };
 
 export const createPropietario = async (data) => {
-  // TODO: Implementar POST para crear propietario
+  // Validar que no exista un propietario con la misma cédula
+  const existingPropietarios = await getPropietarios();
+  const duplicate = existingPropietarios.find(p => p.cc === data.cc);
+  if (duplicate) {
+    throw new Error('Ya existe un propietario con esta cédula');
+  }
   return await api.post("/propietarios", data);
 };
 
