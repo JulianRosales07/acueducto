@@ -1,15 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { api } from '../../src/services/api';
+import { api } from '../services/api';
 import {
   getPropietarios,
   getPropietario,
   createPropietario,
   updatePropietario,
   deletePropietario
-} from '../../src/services/propietariosService';
+} from '../services/propietariosService';
 
 // Mock de la API
-vi.mock('../../src/services/api', () => ({
+vi.mock('../services/api', () => ({
   api: {
     get: vi.fn(),
     post: vi.fn(),
