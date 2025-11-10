@@ -1,11 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
-import { Search, 
-  RefreshCw, 
-  Eye, 
-  DollarSign, 
-  FileText, 
-  Download} from "lucide-react";
+import { Search } from "lucide-react";
 
 export default function FacturasPage() {
   const [facturas, setFacturas] = useState([]);

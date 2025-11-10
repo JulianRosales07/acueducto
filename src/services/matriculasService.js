@@ -10,6 +10,8 @@ export const getMatricula = async (cod) => {
   return response;
 };
 
+
+
 export const createMatricula = async (data) => {
   const response = await api.post("/matriculas", data);
   return response;

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Trash2, Pencil } from "lucide-react";
 import {
   getMantenimientos,
   createMantenimiento,
@@ -230,18 +231,20 @@ export default function MantenimientosPage() {
                   </td>
                   <td className="px-4 py-3 text-gray-600">{m.fecha}</td>
                   <td className="px-4 py-3">
-                    <div className="flex gap-2">
+                    <div className="flex gap-3">
                       <button
                         onClick={() => handleEdit(m)}
-                        className="text-blue-600 hover:underline"
+                        className="p-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
+                        title="Editar"
                       >
-                        Editar
+                        <Pencil size={18} strokeWidth={1.5} />
                       </button>
                       <button
                         onClick={() => handleDelete(m.id)}
-                        className="text-red-600 hover:underline"
+                        className="p-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+                        title="Eliminar"
                       >
-                        Eliminar
+                        <Trash2 size={18} strokeWidth={1.5} />
                       </button>
                     </div>
                   </td>

@@ -12,6 +12,7 @@ import PropietariosPage from "./pages/PropietariosPage";
 import MatriculasPage from "./pages/MatriculasPage";
 import MantenimientosPage from "./pages/MantenimientosPage";
 import SolicitudesPage from "./pages/SolicitudesPage";
+import ReportesPage from "./pages/ReportesPage";
 import FacturasPage from "./pages/FacturasPage";
 import PagosPage from "./pages/PagosPage";
 import NotFoundPage from "./pages/NotFoundPage";
@@ -46,6 +47,7 @@ function App() {
                       <Route path="/matriculas" element={<MatriculasPage />} />
                       <Route path="/mantenimientos" element={<MantenimientosPage />} />
                       <Route path="/solicitudes" element={<SolicitudesPage />} />
+                      <Route path="/reportes" element={<ReportesPage />} />
                       <Route path="/facturas" element={<FacturasPage />} />
                       <Route path="/pagos" element={<PagosPage />} />
                       <Route path="*" element={<NotFoundPage />} />

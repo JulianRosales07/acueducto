@@ -18,6 +18,7 @@ const menuSections = [
     items: [
       { path: "/mantenimientos", label: "Tipos", icon: "🔧" },
       { path: "/solicitudes", label: "Solicitudes", icon: "📝" },
+      { path: "/reportes", label: "Reportes", icon: "📊" },
     ],
   },
   {
@@ -40,6 +41,7 @@ const sidebarIcons = [
 const bottomIcons = [
   { icon: "🔧", path: "/mantenimientos", label: "Mantenimientos" },
   { icon: "📝", path: "/solicitudes", label: "Solicitudes" },
+  { icon: "📊", path: "/reportes", label: "Reportes" },
   { icon: "💰", path: "/facturas", label: "Facturas" },
   { icon: "💳", path: "/pagos", label: "Pagos" },
 ];
@@ -61,28 +63,28 @@ export default function Sidebar() {
 
   return (
     <div className="flex h-screen relative">
-      <div className="w-20 bg-gray-900 flex flex-col items-center py-6 space-y-6 relative">
-        <Link to="/" className="w-14 h-14 bg-white rounded-xl flex items-center justify-center hover:bg-gray-100 transition">
+      <div className="w-20 bg-gray-900 flex flex-col items-center py-4 relative">
+        <Link to="/" className="w-14 h-14 bg-white rounded-xl flex items-center justify-center hover:bg-gray-100 transition mb-4">
           <span className="text-2xl">💧</span>
         </Link>
 
         {!isExpanded && (
           <button
             onClick={toggleSidebar}
-            className="w-10 h-10 bg-gray-700 hover:bg-gray-600 rounded-lg flex items-center justify-center text-white transition"
+            className="w-10 h-10 bg-gray-700 hover:bg-gray-600 rounded-lg flex items-center justify-center text-white transition mb-4"
           >
             →
           </button>
         )}
 
-        <div className="flex-1 flex flex-col items-center space-y-4 pt-8">
+        <div className="flex-1 flex flex-col items-center space-y-2 pt-2">
           {sidebarIcons.map((item, idx) => {
             const isActive = location.pathname === item.path;
             return (
               <Link
                 key={idx}
                 to={item.path}
-                className={`w-10 h-10 flex items-center justify-center rounded-lg transition ${
+                className={`w-10 h-10 flex items-center justify-center rounded-lg transition flex-shrink-0 ${
                   isActive ? "bg-blue-600 text-white" : "text-gray-400 hover:text-white hover:bg-gray-800"
                 }`}
               >
@@ -92,14 +94,14 @@ export default function Sidebar() {
           })}
         </div>
 
-        <div className="flex flex-col items-center space-y-4">
+        <div className="flex flex-col items-center space-y-2 pt-2 pb-2">
           {bottomIcons.map((item, idx) => {
             const isActive = location.pathname === item.path;
             return (
               <Link
                 key={idx}
                 to={item.path}
-                className={`w-10 h-10 flex items-center justify-center rounded-lg transition ${
+                className={`w-10 h-10 flex items-center justify-center rounded-lg transition flex-shrink-0 ${
                   isActive ? "bg-blue-600 text-white" : "text-gray-400 hover:text-white hover:bg-gray-800"
                 }`}
               >
