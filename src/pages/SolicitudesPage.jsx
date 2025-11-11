@@ -25,7 +25,6 @@ export default function SolicitudesPage() {
     id_predio: "",
     cod_matricula: "",
     id_mantenimiento: "",
-    observaciones: "",
     prioridad: "Media",
   });
   const [searchPredio, setSearchPredio] = useState("");
@@ -306,24 +305,24 @@ export default function SolicitudesPage() {
         {/* Sección 1: Propietarios con sus predios */}
         {activeTab === "propietarios" && (
         <div className="bg-white rounded-b-xl shadow-lg overflow-hidden border border-gray-200 border-t-0">
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-5">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
             <h2 className="text-xl font-bold text-white">Propietarios y Predios</h2>
             <p className="text-blue-100 text-sm mt-1">Selecciona un propietario para crear una solicitud</p>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200">
+              <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="px-6 py-3.5 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Propietario</th>
-                  <th className="px-6 py-3.5 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Cédula</th>
-                  <th className="px-6 py-3.5 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Predio</th>
-                  <th className="px-6 py-3.5 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">Acciones</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Propietario</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Cédula</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Predio</th>
+                  <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-gray-200">
                 {filteredSolicitudes.length === 0 ? (
                   <tr>
-                    <td colSpan="4" className="px-6 py-16 text-center">
+                    <td colSpan="4" className="px-6 py-12 text-center">
                       <div className="flex flex-col items-center justify-center text-gray-500">
                         <Search size={48} className="mb-3 text-gray-300" />
                         <p className="text-lg font-medium">
@@ -339,35 +338,31 @@ export default function SolicitudesPage() {
                   filteredSolicitudes.map((s) => {
                     const propietario = s.predio?.propietario;
                     return (
-                      <tr key={s.id} className="hover:bg-blue-50/50 transition-all duration-150">
+                      <tr key={s.id} className="hover:bg-blue-50 transition-colors">
                         <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-11 h-11 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-sm">
-                              <span className="text-white font-bold text-sm">
+                          <div className="flex items-center">
+                            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                              <span className="text-blue-600 font-semibold text-sm">
                                 {propietario ? `${propietario.nombre[0]}${propietario.apellido[0]}` : "?"}
                               </span>
                             </div>
                             <div>
-                              <p className="text-sm font-semibold text-gray-900">
+                              <p className="text-sm font-medium text-gray-900">
                                 {propietario ? `${propietario.nombre} ${propietario.apellido}` : "N/A"}
                               </p>
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4">
-                          <span className="text-sm font-medium text-gray-700">
-                            {propietario?.cc || "N/A"}
-                          </span>
+                        <td className="px-6 py-4 text-sm text-gray-700">
+                          {propietario?.cc || "N/A"}
                         </td>
-                        <td className="px-6 py-4">
-                          <span className="text-sm text-gray-700">
-                            {s.predio?.direccion || "N/A"}
-                          </span>
+                        <td className="px-6 py-4 text-sm text-gray-700">
+                          {s.predio?.direccion || "N/A"}
                         </td>
                         <td className="px-6 py-4 text-right">
                           <button
                             onClick={() => handleOpenFormWithPropietario(propietario?.cc)}
-                            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg transition-all duration-150 text-sm font-semibold shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition text-sm font-medium shadow-sm hover:shadow-md"
                           >
                             Crear Solicitud
                           </button>
