@@ -285,19 +285,7 @@ export default function FacturasPage() {
           Nueva Factura
         </button>
       </div>
-    <div>
-      
-       <div className="flex flex-row gap-2 w-full mb-4 ">
-       <input
-            type="text"
-            placeholder="Buscar por matrícula..."
-            value={busquedaMatricula}
-            onChange={(e) => setBusquedaMatricula(e.target.value)}
-            className="w-full h-12 pl-10 pr-4 text-sm text-gray-700 border border-gray-300 rounded-lg shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-          />
-          
-        </div>
-    </div>
+
       {/* Filtros */}
       <div className="mb-6 bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
         <div className="flex gap-4 items-center flex-wrap">
@@ -322,6 +310,18 @@ export default function FacturasPage() {
               <RefreshCw className="w-4 h-4" />
               Actualizar
             </button>
+            
+          <div className='flex flex-1 max-w-md h-12 text-sm text-gray-700 border border-blue-300 rounded-lg shadow-sm placeholder:text-gray-400 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition'>
+            <div className="text-blue-700 px-3 py-3 rounded text-sm transition"> 
+              <Search />
+            </div>
+            <input
+              className='w-full pl-2 h-12 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none transition'
+              type="text"
+              onChange={(e) => setBusqueda(e.target.value)}
+              placeholder="Buscar por matrícula o CC..."
+            />
+          </div>
           <button
               onClick={() => {
                 setFiltroEstado('');
