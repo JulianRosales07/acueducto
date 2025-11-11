@@ -35,7 +35,7 @@ export default function FacturasPage() {
   // Formulario de facturación masiva
   const [formMasivo, setFormMasivo] = useState({
     periodo_facturacion: '',
-    valor_base: '20000',
+    valor_base: '5000',
     dias_vencimiento: 15
   });
 
@@ -328,7 +328,7 @@ export default function FacturasPage() {
       ).sort((a, b) => new Date(a.fecha_vencimiento) - new Date(b.fecha_vencimiento));
 
       // Generar el desglose de operaciones
-      const valorBase = 20000; // Valor base fijo
+      const valorBase = 5000; // Valor base fijo
       const totalCalculado = valorBase * facturasPendientes.length;
       
       const operaciones = facturasPendientes.map(f => 
@@ -995,10 +995,10 @@ export default function FacturasPage() {
                     <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
                       <p className="text-sm text-yellow-800">
                         <strong>⚠️ Ejemplo de mora acumulativa:</strong><br/>
-                        Si un predio no pagó agosto ($20,000), en septiembre deberá pagar:<br/>
-                        • Valor base septiembre: $20,000<br/>
-                        • Mora acumulada agosto: $20,000<br/>
-                        • <strong>Total: $40,000</strong>
+                        Si un predio no pagó agosto ($5,000), en septiembre deberá pagar:<br/>
+                        • Valor base septiembre: $5,000<br/>
+                        • Mora acumulada agosto: $5,000<br/>
+                        • <strong>Total: $10,000</strong>
                       </p>
                     </div>
                   </div>
