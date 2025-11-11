@@ -13,6 +13,17 @@ import { Search, Plus, Filter, Eye, FileText, Users, TrendingUp, Droplet, Car } 
 
 
 
+  // Paginación
+  const totalPaginas = Math.ceil(listaFiltrada.length / itemsPorPagina);
+  const indiceInicio = (paginaActual - 1) * itemsPorPagina;
+  const indiceFin = indiceInicio + itemsPorPagina;
+  const listaPaginada = listaFiltrada.slice(indiceInicio, indiceFin);
+
+  // Resetear a página 1 cuando cambia la búsqueda o items por página
+  useEffect(() => {
+    setPaginaActual(1);
+  }, [busqueda, itemsPorPagina]);
+
 
 export default function MatriculasPage() {
 
