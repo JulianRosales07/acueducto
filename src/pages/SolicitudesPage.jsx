@@ -25,7 +25,6 @@ export default function SolicitudesPage() {
     id_predio: "",
     cod_matricula: "",
     id_mantenimiento: "",
-    observaciones: "",
     prioridad: "Media",
   });
   const [searchPredio, setSearchPredio] = useState("");

@@ -16,6 +16,7 @@ export default function FacturasPage() {
   const [mostrarModalNueva, setMostrarModalNueva] = useState(false);
   const [mostrarModalDetalle, setMostrarModalDetalle] = useState(false);
   const [mostrarModalPago, setMostrarModalPago] = useState(false);
+  const [mostrarModalMasivo, setMostrarModalMasivo] = useState(false);
   const [facturaSeleccionada, setFacturaSeleccionada] = useState(null);
   const [guardando, setGuardando] = useState(false);
   const [matriculas, setMatriculas] = useState([]);
@@ -29,6 +30,13 @@ export default function FacturasPage() {
     fecha_vencimiento: '',
     valor: '',
     url: ''
+  });
+
+  // Formulario de facturación masiva
+  const [formMasivo, setFormMasivo] = useState({
+    periodo_facturacion: '',
+    valor_base: '20000',
+    dias_vencimiento: 15
   });
 
   // Formulario de pago
@@ -164,6 +172,114 @@ export default function FacturasPage() {
     }
   };
 
+  const generarFacturasMasivas = async (e) => {
+    e.preventDefault();
+
+    if (!formMasivo.periodo_facturacion || !formMasivo.valor_base) {
+      alert('Por favor complete todos los campos requeridos');
+      return;
+    }
+
+    const confirmacion = await Swal.fire({
+      title: '¿Generar facturas masivas?',
+      html: `
+        <div class="text-left">
+          <p class="mb-2"><strong>Periodo:</strong> ${formMasivo.periodo_facturacion}</p>
+          <p class="mb-2"><strong>Valor base:</strong> ${formatearMoneda(formMasivo.valor_base)}</p>
+          <p class="mb-2"><strong>Días de vencimiento:</strong> ${formMasivo.dias_vencimiento}</p>
+          <p class="mt-4 text-sm text-gray-600">Se generarán facturas para TODAS las matrículas activas.</p>
+          <p class="text-sm text-gray-600">La mora se calculará de forma acumulativa.</p>
+          <p class="text-sm text-orange-600 font-semibold">Multa por mora: $5,000 por cada factura vencida.</p>
+        </div>
+      `,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#16a34a',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Sí, generar',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (!confirmacion.isConfirmed) return;
+
+    try {
+      setGuardando(true);
+
+      Swal.fire({
+        title: 'Generando facturas...',
+        html: 'Por favor espere, esto puede tomar unos momentos.',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      const resultado = await api.post('/facturas/generar-masivo', {
+        periodo_facturacion: formMasivo.periodo_facturacion,
+        valor_base: parseFloat(formMasivo.valor_base),
+        dias_vencimiento: parseInt(formMasivo.dias_vencimiento)
+      });
+
+      Swal.close();
+
+      // Mostrar resultado detallado
+      await Swal.fire({
+        title: 'Facturación completada',
+        html: `
+          <div class="text-left">
+            <p class="mb-2"><strong>Total matrículas:</strong> ${resultado.total_matriculas}</p>
+            <p class="mb-2 text-green-600"><strong>Facturas creadas:</strong> ${resultado.facturas_creadas}</p>
+            ${resultado.errores > 0 ? `
+              <p class="mb-2 text-red-600"><strong>Errores:</strong> ${resultado.errores}</p>
+              <div class="mt-2 bg-red-50 border border-red-200 rounded p-2">
+                <p class="font-semibold text-sm mb-1">Detalles de errores:</p>
+                <ul class="text-xs max-h-32 overflow-y-auto">
+                  ${resultado.detalle.fallidas.map(e => 
+                    `<li class="mb-1"><strong>${e.matricula}:</strong> ${e.error}</li>`
+                  ).join('')}
+                </ul>
+              </div>
+            ` : ''}
+            ${resultado.detalle.exitosas.length > 0 ? `
+              <div class="mt-4">
+                <p class="font-semibold mb-2">Resumen de mora:</p>
+                <ul class="text-sm max-h-40 overflow-y-auto">
+                  ${resultado.detalle.exitosas.filter(f => f.valor_mora > 0).slice(0, 5).map(f => 
+                    `<li>Matrícula ${f.matricula}: ${f.facturas_en_mora} factura(s) - Mora: ${formatearMoneda(f.valor_mora)} + Multas: ${formatearMoneda(f.valor_multas || 0)} = Total: ${formatearMoneda(f.valor_total)}</li>`
+                  ).join('')}
+                  ${resultado.detalle.exitosas.filter(f => f.valor_mora > 0).length > 5 ? '<li>... y más</li>' : ''}
+                </ul>
+              </div>
+            ` : ''}
+          </div>
+        `,
+        icon: resultado.facturas_creadas > 0 ? 'success' : 'warning',
+        confirmButtonColor: '#16a34a'
+      });
+
+      setMostrarModalMasivo(false);
+      cargarFacturas();
+
+      // Resetear formulario
+      setFormMasivo({
+        periodo_facturacion: '',
+        valor_base: '',
+        dias_vencimiento: 15
+      });
+
+    } catch (err) {
+      Swal.close();
+      Swal.fire({
+        title: 'Error',
+        text: 'Error al generar facturas masivas: ' + err.message,
+        icon: 'error',
+        confirmButtonColor: '#dc2626'
+      });
+    } finally {
+      setGuardando(false);
+    }
+  };
+
   const verDetalleFactura = async (id) => {
     try {
       setGuardando(true);
@@ -202,12 +318,45 @@ export default function FacturasPage() {
   };
 
   const abrirModalPago = (factura) => {
-    setFacturaSeleccionada(factura);
-    setFormPago({
-      fecha_pago: new Date().toISOString().split('T')[0],
-      metodo_pago: 'efectivo',
-      valor: factura.valor.toString()
-    });
+    // Si la factura está en mora, calcular el desglose
+    if (factura.estado === 'en_mora' || factura.estado === 'Vencida') {
+      // Buscar todas las facturas pendientes de la misma matrícula
+      const facturasPendientes = facturas.filter(f => 
+        f.cod_matricula === factura.cod_matricula && 
+        (f.estado === 'Pendiente' || f.estado === 'Vencida' || f.estado === 'en_mora') &&
+        new Date(f.fecha_vencimiento) <= new Date(factura.fecha_vencimiento)
+      ).sort((a, b) => new Date(a.fecha_vencimiento) - new Date(b.fecha_vencimiento));
+
+      // Generar el desglose de operaciones
+      const valorBase = 20000; // Valor base fijo
+      const totalCalculado = valorBase * facturasPendientes.length;
+      
+      const operaciones = facturasPendientes.map(f => 
+        `${formatearMoneda(valorBase)} (${f.periodo_facturacion || formatearFecha(f.fecha_vencimiento)})`
+      ).join(' + ') + ` = ${formatearMoneda(totalCalculado)}`;
+
+      // Agregar el desglose a la factura seleccionada
+      const facturaConDesglose = {
+        ...factura,
+        observaciones: operaciones,
+        valor: totalCalculado
+      };
+
+      setFacturaSeleccionada(facturaConDesglose);
+      setFormPago({
+        fecha_pago: new Date().toISOString().split('T')[0],
+        metodo_pago: 'efectivo',
+        valor: totalCalculado.toString()
+      });
+    } else {
+      setFacturaSeleccionada(factura);
+      setFormPago({
+        fecha_pago: new Date().toISOString().split('T')[0],
+        metodo_pago: 'efectivo',
+        valor: factura.valor.toString()
+      });
+    }
+    
     setMostrarModalPago(true);
   };
 
@@ -287,13 +436,22 @@ export default function FacturasPage() {
         <h1 className="text-2xl font-bold text-blue-600">
           Gestión de Facturas
         </h1>
-        <button
-          onClick={() => setMostrarModalNueva(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition flex items-center gap-2"
-        >
-          <span>+</span>
-          Nueva Factura
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={() => setMostrarModalMasivo(true)}
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition flex items-center gap-2"
+          >
+            <FileText className="w-4 h-4" />
+            Generar Facturas Masivas
+          </button>
+          <button
+            onClick={() => setMostrarModalNueva(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition flex items-center gap-2"
+          >
+            <span>+</span>
+            Nueva Factura
+          </button>
+        </div>
       </div>
 
 
@@ -650,12 +808,29 @@ export default function FacturasPage() {
               {/* Contenido del Modal */}
               <div className="p-6">
                 <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <p className="text-sm text-gray-700 mb-1">
+                  <p className="text-sm text-gray-700 mb-2">
                     <span className="font-semibold">Matrícula:</span> {facturaSeleccionada.cod_matricula}
                   </p>
-                  <p className="text-sm text-gray-700">
-                    <span className="font-semibold">Valor Factura:</span> {formatearMoneda(facturaSeleccionada.valor)}
+                  <p className="text-sm text-gray-700 mb-2">
+                    <span className="font-semibold">Fecha de Vencimiento:</span> {formatearFecha(facturaSeleccionada.fecha_vencimiento)}
                   </p>
+                  
+                  <div className="mt-3 pt-3 border-t border-blue-300">
+                    <p className="text-xs font-semibold text-gray-700 mb-2">📋 Operaciones:</p>
+                    <div className="bg-white rounded p-3 text-xs text-gray-700">
+                      {facturaSeleccionada.observaciones ? (
+                        <p className="whitespace-pre-wrap font-mono">{facturaSeleccionada.observaciones}</p>
+                      ) : (
+                        <p className="font-mono">Valor base: {formatearMoneda(facturaSeleccionada.valor)}</p>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="mt-3 pt-3 border-t border-blue-300">
+                    <p className="text-sm font-bold text-gray-900">
+                      Valor Total a Pagar: {formatearMoneda(facturaSeleccionada.valor)}
+                    </p>
+                  </div>
                 </div>
 
                 <form onSubmit={registrarPago} id="formPago">
@@ -729,6 +904,124 @@ export default function FacturasPage() {
                   disabled={guardando}
                 >
                   {guardando ? 'Guardando...' : 'Registrar Pago'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Facturación Masiva */}
+      {mostrarModalMasivo && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4 pointer-events-none">
+          <div className="pointer-events-auto">
+            <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden">
+              {/* Header del Modal */}
+              <div className="px-6 py-4 border-b border-gray-200 bg-green-50">
+                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-green-600" />
+                  Generar Facturas Masivas
+                </h2>
+              </div>
+
+              {/* Contenido del Modal */}
+              <div className="p-6">
+                <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <h3 className="font-semibold text-blue-900 mb-2">ℹ️ Información</h3>
+                  <ul className="text-sm text-blue-800 space-y-1">
+                    <li>• Se generarán facturas para <strong>TODAS</strong> las matrículas activas</li>
+                    <li>• El valor base es <strong>fijo</strong> para todos los predios</li>
+                    <li>• La mora es <strong>acumulativa</strong> (suma de facturas no pagadas)</li>
+                    <li>• Las facturas duplicadas para el mismo periodo se rechazarán</li>
+                  </ul>
+                </div>
+
+                <form onSubmit={generarFacturasMasivas} id="formMasivo">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Periodo de Facturación * <span className="text-xs text-gray-500">(Formato: YYYY-MM)</span>
+                      </label>
+                      <input
+                        type="month"
+                        value={formMasivo.periodo_facturacion}
+                        onChange={(e) => setFormMasivo({ ...formMasivo, periodo_facturacion: e.target.value })}
+                        className="w-full border border-gray-300 rounded px-3 py-2"
+                        required
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Ejemplo: 2025-11 para Noviembre 2025
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Valor Base (Fijo para todos) *
+                      </label>
+                      <input
+                        type="number"
+                        value={formMasivo.valor_base}
+                        onChange={(e) => setFormMasivo({ ...formMasivo, valor_base: e.target.value })}
+                        placeholder="20000"
+                        min="0"
+                        step="1000"
+                        className="w-full border border-gray-300 rounded px-3 py-2"
+                        required
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Este valor será el mismo para todos los predios
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Días de Vencimiento *
+                      </label>
+                      <input
+                        type="number"
+                        value={formMasivo.dias_vencimiento}
+                        onChange={(e) => setFormMasivo({ ...formMasivo, dias_vencimiento: e.target.value })}
+                        placeholder="15"
+                        min="1"
+                        max="90"
+                        className="w-full border border-gray-300 rounded px-3 py-2"
+                        required
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Días desde hoy hasta el vencimiento (recomendado: 15)
+                      </p>
+                    </div>
+
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                      <p className="text-sm text-yellow-800">
+                        <strong>⚠️ Ejemplo de mora acumulativa:</strong><br/>
+                        Si un predio no pagó agosto ($20,000), en septiembre deberá pagar:<br/>
+                        • Valor base septiembre: $20,000<br/>
+                        • Mora acumulada agosto: $20,000<br/>
+                        • <strong>Total: $40,000</strong>
+                      </p>
+                    </div>
+                  </div>
+                </form>
+              </div>
+
+              {/* Footer del Modal */}
+              <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setMostrarModalMasivo(false)}
+                  className="flex-1 px-4 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors"
+                  disabled={guardando}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  form="formMasivo"
+                  className="flex-1 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50"
+                  disabled={guardando}
+                >
+                  {guardando ? 'Generando...' : 'Generar Facturas'}
                 </button>
               </div>
             </div>
