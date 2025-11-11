@@ -9,21 +9,7 @@ import { getMatriculas } from '../services/matriculasService';
 import { listaFiltrada } from '../components/ComponetesGrupo6/lib/formatters';
 import ModalComponent from '../components/ModalComponent';
 import { Button } from 'flowbite-react';
-import { Search, Plus, Filter, Eye, FileText, Users, TrendingUp, Droplet, Car } from "lucide-react"
-
-
-
-  // Paginación
-  const totalPaginas = Math.ceil(listaFiltrada.length / itemsPorPagina);
-  const indiceInicio = (paginaActual - 1) * itemsPorPagina;
-  const indiceFin = indiceInicio + itemsPorPagina;
-  const listaPaginada = listaFiltrada.slice(indiceInicio, indiceFin);
-
-  // Resetear a página 1 cuando cambia la búsqueda o items por página
-  useEffect(() => {
-    setPaginaActual(1);
-  }, [busqueda, itemsPorPagina]);
-
+import { Plus, Droplet } from "lucide-react"
 
 export default function MatriculasPage() {
 
