@@ -322,17 +322,7 @@ export default function FacturasPage() {
             Actualizar
           </button>
             
-          <div className='flex flex-1 max-w-md h-12 text-sm text-gray-700 border border-blue-300 rounded-lg shadow-sm placeholder:text-gray-400 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition'>
-            <div className="text-blue-700 px-3 py-3 rounded text-sm transition"> 
-              <Search />
-            </div>
-            <input
-              className='w-full pl-2 h-12 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none transition'
-              type="text"
-              onChange={(e) => setBusqueda(e.target.value)}
-              placeholder="Buscar por matrícula o CC..."
-            />
-          </div>
+
 
           <button
             onClick={() => {
@@ -487,54 +477,7 @@ export default function FacturasPage() {
                               <Download className="w-4 h-4" />
                             </button>
                         }
-                        <button
-                          onClick={async () => {
-                            try {
-                              const response = await fetch(`${import.meta.env.VITE_API_URL}/facturas/${factura.id}/pdf`);
-                              
-                              if (!response.ok) {
-                                const error = await response.json();
-                                throw new Error(error.error || 'No hay PDF guardado');
-                              }
-
-                              // Descargar el PDF guardado
-                              const blob = await response.blob();
-                              const url = window.URL.createObjectURL(blob);
-                              const a = document.createElement('a');
-                              a.href = url;
-                              a.download = `factura_${factura.id}_guardada.pdf`;
-                              document.body.appendChild(a);
-                              a.click();
-                              window.URL.revokeObjectURL(url);
-                              document.body.removeChild(a);
-
-                              const Toast = Swal.mixin({
-                                toast: true,
-                                position: 'bottom-end',
-                                showConfirmButton: false,
-                                timer: 2000,
-                                timerProgressBar: true,
-                                iconColor: '#16a34a',
-                                background: '#fff',
-                              });
-
-                              Toast.fire({
-                                icon: 'success',
-                                title: 'PDF descargado desde la base de datos',
-                              });
-                            } catch (error) {
-                              Swal.fire({
-                                icon: 'info',
-                                title: 'PDF no disponible',
-                                text: error.message,
-                              });
-                            }
-                          }}
-                          className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
-                          title="Descargar PDF guardado"
-                        >
-                          <FileText className="w-4 h-4" />
-                        </button>
+                       
                         <CompartirWhatsApp factura={factura} />
                       </div>
                     </td>
