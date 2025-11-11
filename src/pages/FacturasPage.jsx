@@ -454,33 +454,87 @@ export default function FacturasPage() {
                           <FileText className="w-4 h-4" />
                         </button>
                         {
-                          <a
-                              target="_blank"
-                              rel="noopener noreferrer"
+                          <button
                               className="p-2 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-all duration-200"
-                              title="Descargar PDF"
-                              onClick={() => {
+                              title="Descargar y guardar PDF"
+                              onClick={async () => {
+                                try {
+                                  await generarReciboPDF(factura);
+                                  
+                                  const Toast = Swal.mixin({
+                                    toast: true,
+                                    position: 'bottom-end',
+                                    showConfirmButton: false,
+                                    timer: 3000,
+                                    timerProgressBar: true,
+                                    iconColor: '#16a34a',
+                                    background: '#fff',
+                                  });
 
-                                generarReciboPDF(factura);
-                                const Toast = Swal.mixin({
-                                  toast: true,
-                                  position: 'bottom-end',
-                                  showConfirmButton: false,
-                                  timer: 2000,
-                                  timerProgressBar: true,
-                                  iconColor: '#16a34a',
-                                  background: '#fff',
-                                });
-
-                                Toast.fire({
-                                  icon: 'success',
-                                  title: 'PDF descargado exitosamente',
-                                });
+                                  Toast.fire({
+                                    icon: 'success',
+                                    title: 'PDF descargado y guardado en la base de datos',
+                                  });
+                                } catch (error) {
+                                  Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: 'Error al generar el PDF: ' + error.message,
+                                  });
+                                }
                               }}
                             >
                               <Download className="w-4 h-4" />
-                            </a>
+                            </button>
                         }
+                        <button
+                          onClick={async () => {
+                            try {
+                              const response = await fetch(`${import.meta.env.VITE_API_URL}/facturas/${factura.id}/pdf`);
+                              
+                              if (!response.ok) {
+                                const error = await response.json();
+                                throw new Error(error.error || 'No hay PDF guardado');
+                              }
+
+                              // Descargar el PDF guardado
+                              const blob = await response.blob();
+                              const url = window.URL.createObjectURL(blob);
+                              const a = document.createElement('a');
+                              a.href = url;
+                              a.download = `factura_${factura.id}_guardada.pdf`;
+                              document.body.appendChild(a);
+                              a.click();
+                              window.URL.revokeObjectURL(url);
+                              document.body.removeChild(a);
+
+                              const Toast = Swal.mixin({
+                                toast: true,
+                                position: 'bottom-end',
+                                showConfirmButton: false,
+                                timer: 2000,
+                                timerProgressBar: true,
+                                iconColor: '#16a34a',
+                                background: '#fff',
+                              });
+
+                              Toast.fire({
+                                icon: 'success',
+                                title: 'PDF descargado desde la base de datos',
+                              });
+                            } catch (error) {
+                              Swal.fire({
+                                icon: 'info',
+                                title: 'PDF no disponible',
+                                text: error.message,
+                              });
+                            }
+                          }}
+                          className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
+                          title="Descargar PDF guardado"
+                        >
+                          <FileText className="w-4 h-4" />
+                        </button>
                         <CompartirWhatsApp factura={factura} />
                       </div>
                     </td>

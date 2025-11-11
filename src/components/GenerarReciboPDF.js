@@ -174,7 +174,54 @@ export const generarReciboPDF = async (factura) => {
     });
 
     const nombre = factura.cod_matricula ? `facturas_matricula_${factura.cod_matricula}.pdf` : `factura_${factura.id}.pdf`;
+    
+    // Descargar el PDF
     doc.save(nombre);
+
+    // Enviar el PDF a la base de datos
+    try {
+      console.log('Iniciando subida de PDF a la base de datos...');
+      console.log('URL de la API:', import.meta.env.VITE_API_URL);
+      console.log('ID de factura:', factura.id);
+      
+      // Convertir el PDF a Blob
+      const pdfBlob = doc.output('blob');
+      console.log('Tamaño del PDF:', pdfBlob.size, 'bytes');
+      
+      // Crear FormData para enviar el archivo
+      const formData = new FormData();
+      formData.append('pdf', pdfBlob, nombre);
+
+      // Enviar a la API
+      const url = `${import.meta.env.VITE_API_URL}/facturas/${factura.id}/pdf`;
+      console.log('Enviando a:', url);
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        body: formData
+      });
+
+      console.log('Respuesta del servidor:', response.status, response.statusText);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Error del servidor:', errorText);
+        try {
+          const error = JSON.parse(errorText);
+          console.error('Error al guardar PDF en la base de datos:', error);
+        } catch (e) {
+          console.error('Respuesta no es JSON:', errorText);
+        }
+      } else {
+        const result = await response.json();
+        console.log('PDF guardado exitosamente en la base de datos:', result);
+      }
+    } catch (uploadErr) {
+      console.error('Error al subir PDF a la base de datos:', uploadErr);
+      console.error('Stack trace:', uploadErr.stack);
+      // No lanzamos el error para que la descarga se complete
+    }
+
   } catch (err) {
     console.error('Error generando PDF:', err);
     throw err;
