@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react';
 import { getMatriculas } from '../services/matriculasService';
 import { listaFiltrada } from '../components/ComponetesGrupo6/lib/formatters';
 import ModalComponent from '../components/ModalComponent';
+import FormMatricula from '../components/ComponentesGrupo5/FormMatricula';
 import { Button } from 'flowbite-react';
 import { Plus, Droplet } from "lucide-react"
 
@@ -19,6 +20,7 @@ export default function MatriculasPage() {
   const [error, setError] = useState('');
   const [openModal, setOpenModal] = useState(false);
   const [seledtMatricula, setseledtMatricula] = useState({});
+  const [showFormMatricula, setShowFormMatricula] = useState(false);
 
   const cargar = async () => {
     try {
@@ -67,6 +69,7 @@ export default function MatriculasPage() {
             <Button
               size="lg"
               className="gap-2 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all"
+              onClick={() => setShowFormMatricula(true)}
             >
               <Plus className="h-5 w-5" />
               Nueva Matrícula
@@ -114,6 +117,17 @@ export default function MatriculasPage() {
           <ModalComponent openModal={openModal} setOpenModal={setOpenModal} matricula={seledtMatricula} />
         </Card>
       </div>
+
+      {/* Modal de crear matrícula */}
+      {showFormMatricula && (
+        <FormMatricula
+          onClose={() => setShowFormMatricula(false)}
+          onSuccess={() => {
+            cargar();
+            setShowFormMatricula(false);
+          }}
+        />
+      )}
     </>
 
   );
