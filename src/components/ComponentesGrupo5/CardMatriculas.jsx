@@ -1,14 +1,13 @@
 
-const CardMatricula =(
-    {
+const CardMatricula = ({
   codigo,
   estado,
   direccion,
   fecha,
   tipo,
   onClick,
-}
-) => {
+  matricula
+}) => {
     return (
         <>
         <div
@@ -43,11 +42,12 @@ const CardMatricula =(
         </div>
       </div>
 
-      <p className="text-xs text-blue-600 font-medium">Toca para ver detalles completos</p>
+      <div className="flex justify-between items-center mt-3 border-t pt-3">
+        <p className="text-xs text-blue-600 font-medium">Haz clic para ver detalles completos</p>
+      </div>
     </div>
-
-        </>
-    );
+    </>
+  );
 }
 
 export default CardMatricula;
